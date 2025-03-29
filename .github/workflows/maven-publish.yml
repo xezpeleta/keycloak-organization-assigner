@@ -1,22 +1,27 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
+# This workflow will build a JAR using Maven and then publish it
+# as an asset to the GitHub Release that triggered the workflow.
+# It also optionally publishes to GitHub Packages.
 
-name: Maven Package
+name: Build and Release Asset
 
 on:
   release:
-    types: [created]
+    types: [created] # Triggers when a new GitHub Release is created
 
 jobs:
-  build:
+  build-and-release:
 
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read      # Needed to checkout the code
+      packages: write     # Needed to publish packages to GitHub Packages (if keeping that step)
+      # Add 'contents: write' if the specific upload action requires it,
+      # but actions/upload-release-asset uses GITHUB_TOKEN which usually suffices for releases.
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
@@ -25,10 +30,22 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Build JAR with Maven
+      # This creates the JAR file in the target/ directory
+      run: mvn -B package --file pom.xml -DskipTests # Often skip tests during release build if tested elsewhere
 
-    - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+    # --- Step to upload the JAR to the GitHub Release ---
+    - name: Upload Release Asset (JAR)
+      uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # This URL is automatically provided by the 'release' event context
+        upload_url: ${{ github.event.release.upload_url }}
+        # Path to the asset file you want to upload (using wildcard)
+        asset_path: ./target/keycloak-auto-org-assigner-*.jar
+        # Desired name for the asset file on the release page
+        # Using the release tag name (often the version) makes it informative
+        asset_name: keycloak-auto-org-assigner-${{ github.event.release.tag_name }}.jar
+        # MIME type for JAR files
+        asset_content_type: application/java-archive
