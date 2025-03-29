@@ -105,4 +105,13 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <!-- The ID MUST match the server-id used in setup-java step in workflow -->
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/xezpeleta/keycloak-organization-assigner </url>
+        </repository>
+    </distributionManagement>
+
 </project>
