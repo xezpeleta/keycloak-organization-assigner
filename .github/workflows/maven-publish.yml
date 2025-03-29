@@ -26,20 +26,20 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn clean package -DskipTests --file pom.xml
+      # Building jar: /home/runner/work/keycloak-organization-assigner/keycloak-organization-assigner/target/keycloak-auto-org-assigner-1.0.0.jar
 
-    - name: Maven package to compile the code and create the JAR
-      run: mvn package --file pom.xml
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-    
+    - name: List target directory
+      run: ls -la target
+
     - name: Upload Release Asset (JAR)
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
         # Use the pattern for now, verify name with the ls output
-        asset_path: ./target/keycloak-auto-org-assigner-*.jar
+        #asset_path: ./target/keycloak-auto-org-assigner-*.jar
+        asset_path: /home/runner/work/keycloak-organization-assigner/keycloak-organization-assigner/target/keycloak-auto-org-assigner-*.jar
         asset_name: keycloak-auto-org-assigner-${{ github.event.release.tag_name }}.jar
         asset_content_type: application/java-archive
