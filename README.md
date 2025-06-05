@@ -2,7 +2,7 @@
 
 This is a Keycloak custom SPI that automatically assigns users to organizations based on their email domain.
 
-Starting from Keycloak 26, `Organizations` are fully supported in Keycloak. This SPI allows you to automatically assign users to organizations based on their email domain, making it easier to manage user access and permissions.
+Starting from Keycloak 26, `Organizations` are fully supported in Keycloak. This SPI allows you to automatically assign users to organizations based on their email domain when they register via Keycloak's registration flow, making it easier to manage user access and permissions.
 
 
 ## Compilation
